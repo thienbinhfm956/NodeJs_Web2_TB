@@ -20,7 +20,10 @@
                                 <h6>{{title}}</h6>
                             </a>
                             <div class="post-thumb">
-                                <a href="/users/read/{{id}}/{{slug_title}}"><img src="/img/bg-img/25.jpg" alt=""></a>
+                                <!-- trong bài viết ảnh đầu -->                                
+                                <a href="/users/read/{{id}}/{{slug_title}}">
+                                    <img src={{photo}} alt="">
+                                </a>
                             </div>
                             <div class="post-meta">
                                 <p class="post-author">By: <a href="#">{{pseudonym}}</a> | {{post_date}}</p>
