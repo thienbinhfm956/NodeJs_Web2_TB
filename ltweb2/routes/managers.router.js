@@ -41,11 +41,11 @@ router.get("/categories", (req, res, next) => {
 });
 
 router.get("/categories/delete/:id", (req, res, next) => {
-  var CatID = req.params.id;
+  var CatID = +req.params.id;
   var retUrl = req.query.retUrl || "/managers/categories";
   if (res.locals.isAuthenticated && res.locals.is_admin) {
     categoryModel
-      .remove_category(CatID)
+      .delete(CatID)
       .then(res.redirect(retUrl))
       .catch(next);
   } else {
@@ -76,9 +76,10 @@ router.get("/categories/edit/:id", (req, res, next) => {
   }
 });
 
+
 router.post("/categories/edit/:id", (req, res, next) => {
   var entity = {
-    id: req.body.id,
+    id : +req.params.id,
     name: req.body.cat_name,
     slug_name: req.body.slug_name,
     is_delete: +req.body.is_delete
@@ -268,6 +269,71 @@ router.post("/subcategory1/add", (req, res, next) => {
   }
 });
 
+router.get("/subcategory1/edit/:id",async (req, res, next) => {
+  var SubID = +req.params.id;
+  var categories =await categoryModel.all();
+  if (res.locals.isAuthenticated && res.locals.is_admin) {
+    categoryModel
+      .singleBy("subcategory", "id", SubID)
+      .then(rows => {
+        for (const c of categories) {
+          if(rows[0].id_category === c.id){
+            c.isSelected = true;
+          }
+        }
+        res.render("view_managers/vm_categories/edit_subcategory", {
+          layout: "sbadmin_layout",
+          categories: categories,
+          id: SubID,
+          subCategory : rows[0]
+        });
+      })
+      .catch(next);
+  } else {
+    res.render("404", {
+      layout: false
+    });
+  }
+});
+
+
+router.post("/subcategory1/edit/:id",async (req, res, next) => {
+  var entity = {
+    id : +req.params.id,
+    table: "subcategory",
+    name: req.body.subname,
+    slug_name: req.body.slug_name,
+    id_category: +req.body.chooseCat,
+    is_delete: +req.body.is_delete
+  };
+  if (res.locals.isAuthenticated && res.locals.is_admin) {
+    categoryModel
+      .update_Table(entity)
+      .then(res.redirect("/managers/subcategories1"))
+      .catch(next);
+  } else {
+    res.render("404", {
+      layout: false
+    });
+  }
+});
+
+router.get("/subcategory1/delete/:id", (req, res, next) => {
+  var subID = +req.params.id;
+  var table = 'subcategory'
+  var retUrl = req.query.retUrl || "/managers/subcategories1";
+  if (res.locals.isAuthenticated && res.locals.is_admin) {
+    categoryModel
+      .deletesub(subID,table)
+      .then(res.redirect(retUrl))
+      .catch(next);
+  } else {
+    res.render("404", {
+      layout: false
+    });
+  }
+});
+
 router.get("/subcategory1/subname-is-available", (req, res, next) => {
   var subname = req.query.exist_subname;
   categoryModel.singleBy("subcategory", "name", subname).then(rows => {
@@ -325,6 +391,66 @@ router.get("/users", (req, res, next) => {
   }
   // res.end("managers/users")
 });
+
+router.get("/users/edit/:id",async (req, res, next) => {
+  var UserID = +req.params.id;
+  var permission =await userModel.allpermission();
+  if (res.locals.isAuthenticated && res.locals.is_admin) {
+    userModel
+      .single( UserID)
+      .then(rows => {
+        for (const c of permission) {
+          if(rows[0].id_permission === c.id){
+            c.isSelected = true;
+          }
+        }
+        res.render("view_managers/vm_users/edit_user", {
+          layout: "sbadmin_layout",
+          user: rows[0],
+          permission: permission
+        });
+      })
+      .catch(next);
+  } else {
+    res.render("404", {
+      layout: false
+    });
+  }
+});
+
+router.post("/users/edit/:id",async (req, res, next) => {
+  var entity = {
+    id : +req.params.id,
+    id_permission: req.body.permission,
+    is_delete : req.body.is_delete
+  };
+  if (res.locals.isAuthenticated && res.locals.is_admin) {
+    userModel
+      .update(entity)
+      .then(res.redirect("/managers/users"))
+      .catch(next);
+  } else {
+    res.render("404", {
+      layout: false
+    });
+  }
+});
+
+router.get("/users/delete/:id", (req, res, next) => {
+  var UserID = +req.params.id;
+  var retUrl = req.query.retUrl || "/managers/users";
+  if (res.locals.isAuthenticated && res.locals.is_admin) {
+    userModel
+      .remove(UserID)
+      .then(res.redirect(retUrl))
+      .catch(next);
+  } else {
+    res.render("404", {
+      layout: false
+    });
+  }
+});
+
 
 /* #endregion */
 
