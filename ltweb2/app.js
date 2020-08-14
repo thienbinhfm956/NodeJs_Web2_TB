@@ -7,6 +7,7 @@ var numeral = require("numeral");
 var hbs_helpers = require("handlebars-helpers")();
 var bcrypt = require("bcrypt");
 
+
 var http = require("http");
 var url = require("url");
 
@@ -139,8 +140,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-const hostname = "127.0.0.1";
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+// const hostname = "127.0.0.1";
+// const port = 3000;
+// app.listen(port, () => {
+//   console.log(`Server running at http://${hostname}:${port}/`);
+// });
+
+var server = app.listen(process.env.PORT || 3000, function () {
+  var port = server.address().port;
+  console.log('Express is working on port ' + port);
 });
