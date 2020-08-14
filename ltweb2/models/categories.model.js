@@ -85,6 +85,10 @@ module.exports = {
     return db.delete(__TB_Category__, "id", id);
   },
 
+  deletesub: (id,table) => {
+    return db.delete(table, "id", id);
+  },
+
   /*remove_category: id => {
     return db.is_delete("category", "id", id,1);
   }*/
