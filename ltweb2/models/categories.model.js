@@ -61,7 +61,7 @@ module.exports = {
   add_Table: entity => {
     var table = entity.table;
     delete entity.table;
-    console.log(entity);
+    /*console.log(entity);*/
     return db.add(table, entity);
   },
 
@@ -73,12 +73,19 @@ module.exports = {
     delete entity.id;
     return db.update(__TB_Category__, "id", entity, id);
   },
+  update_Table: entity => {
+    var table = entity.table;
+    delete entity.table;
+    var id = entity.id;
+    delete entity.id;
+    return db.update(table, "id", entity, id);
+  },
 
   delete: id => {
     return db.delete(__TB_Category__, "id", id);
   },
 
-  remove_category: id => {
+  /*remove_category: id => {
     return db.is_delete("category", "id", id,1);
-  }
+  }*/
 };
