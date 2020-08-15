@@ -7,6 +7,7 @@ var postModel = require("../models/post.model");
 var restricted = require("../middlewares/restricted.mdw");
 var db=require("../utils/db");
 var router = express.Router();
+var premium = require("../middlewares/premium.mdw")
 
 router.get("/register", (req, res, next) => {
   res.render("view_users/register", {
@@ -193,8 +194,13 @@ router.post("/changes_password", restricted, (req, res, next) => {
   }
 });
 //read single post
-router.get("/read/:id/:slug_title", (req, res, next) => {
+router.get("/read/:id/:slug_title",premium ,async (req, res, next) => {
   var id =req.params.id;
+  var rows =await postModel.single(id);
+  if(rows[0].is_premium == 1){
+    var maxAge = 60000;
+    req.session.cookie.maxAge = maxAge;
+  }
   Promise.all([
     postModel.getViews(id),
     postModel.single(id),
@@ -203,10 +209,10 @@ router.get("/read/:id/:slug_title", (req, res, next) => {
     db.load(`
     select post.*, category.name as 'catname', category.slug_name as 'cat_slugname'
     from post join category on post.id_category = category.id
-    where post.is_delete = 0 and
+    where post.is_delete = 0 and post.id != '${req.params.id}' and
     post.id_category = (select post.id_category 
 					          from post
-                    where post.id = '${req.params.id}') limit 0, 5 `)
+                    where post.id = '${req.params.id}') `)
   ])
   .then(([temp,post,comment,sameCat]) => {
     var view = +temp[0]['views'];
@@ -227,6 +233,7 @@ router.get("/read/:id/:slug_title", (req, res, next) => {
         comment: comment,
         sameCat:sameCat
       },
+      
       console.log(viewEntity)
      );
     }).catch(next);
