@@ -61,7 +61,6 @@ module.exports = {
   add_Table: entity => {
     var table = entity.table;
     delete entity.table;
-    /*console.log(entity);*/
     return db.add(table, entity);
   },
 
@@ -73,6 +72,7 @@ module.exports = {
     delete entity.id;
     return db.update(__TB_Category__, "id", entity, id);
   },
+
   update_Table: entity => {
     var table = entity.table;
     delete entity.table;
@@ -84,12 +84,7 @@ module.exports = {
   delete: id => {
     return db.delete(__TB_Category__, "id", id);
   },
-
   deletesub: (id,table) => {
     return db.delete(table, "id", id);
   },
-
-  /*remove_category: id => {
-    return db.is_delete("category", "id", id,1);
-  }*/
 };

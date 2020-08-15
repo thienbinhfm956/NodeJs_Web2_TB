@@ -58,5 +58,8 @@ module.exports = {
 
   delete: id => {
     return db.delete(__TB_Users__, __IDField__, id);
+  },
+  allpermission: () =>{
+    return db.load(`select * from  user_permission`);
   }
 };

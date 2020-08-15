@@ -9,7 +9,7 @@ var config = require("../config/default.json");
 
 var storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, "./public/img/post/uploads");
+    cb(null, "./public/img/uploads");
   },
 
   filename: function(req, file, cb) {
@@ -178,10 +178,21 @@ router.get("/edit/:id", (req, res, next) => {
     categoryModel
       .singleBy("post", "id", req.params.id)
       .then(rows => {
+        for (const c of res.locals.post_categories_mdw) {
+          if(rows[0].id_category === c.id){
+            c.isSelected = true;
+          }
+        }
+        for (const c of  res.locals.post_subcategories_mdw) {
+          if(rows[0].id_subcategory === c.id){
+            c.isSelected = true;
+          }
+        }
         res.render("view_writers/edit", {
           layout: "writer_layout",
           post: rows[0],
-          category: res.locals.post_categories_mdw
+          category: res.locals.post_categories_mdw,
+          subcategories: res.locals.post_subcategories_mdw
         });
       })
       .catch(next);
@@ -254,7 +265,7 @@ router.get("/writing/subcat-is-available", (req, res, next) => {
   }
 });
 
-router.post("/writing", upload.array("fuMain", 2), (req, res, next) => {
+router.post("/writing", upload.single("fuMain"), (req, res, next) => {
   if (res.locals.isAuthenticated && res.locals.is_writer) {
     var TagArr = [];
     var checkedtags = req.body.tags;
@@ -271,7 +282,8 @@ router.post("/writing", upload.array("fuMain", 2), (req, res, next) => {
       id_category: req.body.category,
       id_subcategory: req.body.subcategory,
       content: req.body.content,
-      summary: req.body.summary
+      summary: req.body.summary,
+      photo: req.file.filename
     };
 
     console.log(entity);
@@ -342,7 +354,7 @@ router.post("/writing", upload.array("fuMain", 2), (req, res, next) => {
   }
 });
 
-router.post("/edit/:id", (req, res, next) => {
+router.post("/edit/:id",upload.single("fuMain"), (req, res, next) => {
   if (res.locals.isAuthenticated && res.locals.is_writer) {
   if (req.body.category == 0) {
     res.redirect("/writers/edit/" + res.params.id);
@@ -356,7 +368,9 @@ router.post("/edit/:id", (req, res, next) => {
         content: req.body.content,
         id_user: res.locals.writer_mdw[0]["id_user"],
         pseudonym: res.locals.writer_mdw[0]["pseudonym"],
-        last_update: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss")
+        last_update: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
+        id_subcategory: req.body.subcategory,
+        photo: req.file.filename
       };
 
       postModel

@@ -458,9 +458,9 @@ router.get("/search", (req, res, next) => {
               join subcategory on  post.id_subcategory = subcategory.id  
     where 
     (
-       MATCH (post.title, post.summary, post.content, post.slug_title) AGAINST ('${keyword}')
-    OR MATCH (category.name, category.slug_name) AGAINST ('${keyword}')
-    OR MATCH (subcategory.name, subcategory.slug_name) AGAINST ('${keyword}')
+       MATCH (post.title, post.summary, post.content, post.slug_title) AGAINST ('${keyword}' IN NATURAL LANGUAGE MODE)
+    OR MATCH (category.name, category.slug_name) AGAINST ('${keyword}' IN NATURAL LANGUAGE MODE)
+    OR MATCH (subcategory.name, subcategory.slug_name) AGAINST ('${keyword}'IN NATURAL LANGUAGE MODE)
     )  
     and post.status = 2 and post.is_delete = 0
     limit ${limit} offset ${start_offset}`),  
