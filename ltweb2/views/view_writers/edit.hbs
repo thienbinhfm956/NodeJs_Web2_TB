@@ -13,13 +13,22 @@
 <script>
     $(function () {
 
-        $('#fuMain').fileinput({
-            theme: 'fa',
-            dropZoneEnabled: false,
-            allowedFileExtensions: ['png', 'jpg', 'gif'],
-            uploadClass: 'btn btn-success',
-            uploadUrl: '/upload',
-            uploadAsync: false,
+        
+
+       $('#fuMain').fileinput({
+        theme: 'fa',
+        dropZoneEnabled: false,
+        allowedFileExtensions: ['png', 'jpg', 'gif'],
+        uploadClass: 'btn btn-success',
+        maxFileCount: 2,
+        uploadAsync: false,
+        showCaption: true,
+        showPreview: true,
+        showRemove: true,
+        showUpload: false, // <------ just set this from true to false
+        showCancel: true,
+        showUploadedThumbs: true,
+            {{!-- uploadUrl: '/upload', --}}
         });
 
         tinymce.init({
@@ -41,12 +50,76 @@
                 });
             }
         });
+
+
+        $('#frmPost').validate({
+            onkeyup: false,
+            rules: {
+
+                title: {
+                    required: true
+                },
+                slug: {
+                    required: true
+                },
+
+                category: {
+                    required: true,
+                },
+
+                subcategory: {
+                    required: true,
+                    remote: {
+                        url: '/writers/writing/subcat-is-available',
+                        data: {
+                            id_cat: function () {
+                                return $('#category').val();
+                            },
+                            id_subcat: function () {
+                                return $('#subcategory').val();
+                            }
+                        }
+                    }
+                },
+
+            },
+
+            messages: {
+                title: {
+                    required: 'This field is required.',
+                },
+
+                slug: {
+                    required: 'This field is required.',
+                },
+
+                category: {
+                    required: 'This field is required.',
+                },
+
+                subcategory: {
+                    required: 'This field is required.',
+                    remote: 'Choose correct sub category'
+                },
+            },
+
+        errorElement: 'small',
+        errorClass: 'help-block text-danger',
+        validClass: 'is-valid',
+        highlight: function (e) {
+            $(e).removeClass('is-valid').addClass('is-invalid');
+        },
+        unhighlight: function (e) {
+            $(e).removeClass('is-invalid').addClass('is-valid');
+        },
+        });
+
     })
 </script>
 
 {{/section}}
 {{#with this.post}}
-<form action="" method="POST">
+<form novalidate id="frmPost" action="" method="POST" enctype="multipart/form-data">
     <div class="card shadow">
         <h5 class="card-header">
             Edit Post
@@ -70,10 +143,33 @@
                 <select name="category" class="form-control">
                     <option value="0">--</option>
                     {{#each this.category}}
-                    <option value="{{id}}">{{name}}</option>
+                    <option value="{{id}}" {{#if isSelected}}selected{{/if}}>{{name}}</option>
                     {{/each}}
                 </select>
-            </div>{{#with this.post}}
+            </div>
+            <div class="form-group">
+                <label for="category">Sub Category</label>
+                <select id="subcategory" name="subcategory" class="form-control">
+                    <option value="0">--</option>
+                    {{#each this.subcategories}}
+                    {{#each ../category}}
+                    {{#eq ../id_category id}}
+                    <option value="{{../id}}" {{#if isSelected}}selected{{/if}}> Cat: {{name}} -- Sub: {{../name}}
+                    </option>
+                    {{/eq}}
+                    {{/each}}
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fuMain">Photo:</label>
+                <div class="file-loading">
+                    <input id="fuMain" name="fuMain" type="file" multiple>
+                </div>
+            </div>
+            
+            
+            {{#with this.post}}
             <div class="form-group">
                 <label for="summary">Summary</label>
                 <div class="">
